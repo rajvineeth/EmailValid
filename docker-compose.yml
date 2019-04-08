@@ -1,0 +1,179 @@
+version: '3.3'
+
+services:
+  mysql1:
+    image: mysql:5.5
+    restart: always
+    environment:
+      MYSQL_DATABASE: 'userprofile'
+      # So you don't have to use root, but you can if you like
+      MYSQL_USER: 'root'
+      # You can use whatever password you like
+      MYSQL_PASSWORD: 'root'
+      # Password for root access
+      MYSQL_ROOT_PASSWORD: 'root'
+    ports:
+      # <Port exposed> : < MySQL Port running inside container>
+      - '3306:3306'
+    expose:
+      # Opens port 3306 on the container
+      - '3306'
+      # Where our data will be persisted
+    volumes:
+      - mydb2:/var/lib/mysql
+    
+    network_mode: 'host'
+    hostname: localhost
+
+  # mysql2:
+  #   image: mysql:5.5
+  #   restart: always
+  #   environment:
+  #     MYSQL_DATABASE: 'blacklist'
+  #     # So you don't have to use root, but you can if you like
+  #     MYSQL_USER: 'root'
+  #     # You can use whatever password you like
+  #     MYSQL_PASSWORD: 'root'
+  #     # Password for root access
+  #     MYSQL_ROOT_PASSWORD: 'root'
+  #   ports:
+  #     # <Port exposed> : < MySQL Port running inside container>
+  #     - '3309:3306'
+  #   expose:
+  #     # Opens port 3306 on the container
+  #     - '3309'
+  #     # Where our data will be persisted
+  #   volumes:
+  #     - mydb1:/var/lib/mysql
+
+  zookeeper:
+    image: wurstmeister/zookeeper
+    container_name: zookeeper
+    hostname: zookeeper
+    ports:
+      - "2181:2181"
+    expose:
+      - 2181
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    restart: always
+
+
+  kafka:
+    image: wurstmeister/kafka:0.10.2.0
+    container_name: kafka
+    ports:
+      - "9092:9092"
+    expose:
+      - 9092
+    environment:
+      KAFKA_ADVERTISED_HOST_NAME: localhost
+      KAFKA_CREATE_TOPICS: "eValid:1:1,OtpGenerate:1:1"
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+    depends_on:
+      - zookeeper
+    restart: always
+
+  eureka:
+    image: eureka:v1
+    build: EurekaServers/
+    restart: always
+    container_name: eureka-container
+    network_mode: host
+    hostname: localhost
+    ports:
+      - "8761:8761"
+    expose: 
+      - 8761
+
+  mongodb:
+    image: mongo:3.2-jessie
+    ports:
+      - "27017:27017"
+    container_name: mongo-db
+    network_mode: host
+    hostname: localhost
+
+  config-server:
+    image: config-server:v1
+    build: ConfigServer/
+    restart: always
+    container_name: config-container
+    network_mode: host
+    hostname: localhost
+    depends_on:
+      - eureka
+    ports:
+      - "8888:8888"
+    expose:
+      - 8888
+
+  userprofile-service:
+    image: userprofile-service:v1
+    build: UserProfile/
+    restart: always
+    network_mode: host
+    container_name: userprofile
+    environment: 
+      VIRTUAL_HOST: 'localhost'
+    depends_on:
+      - eureka
+      - config-server
+      - mysql1
+  
+    ports:
+      - 7000:7000
+    
+  emailvalidation-service:
+     image: emailvalidation-service:v1
+     build: EmailValidation/
+     restart: always
+    #  container_name: email-container
+     network_mode: host
+     depends_on:
+       - eureka
+       - config-server
+       - userprofile-service
+     ports: 
+       - 7001
+
+  otp-service:
+    image: otp-service:v1
+    build: OTPService/
+    restart: always
+    container_name: otp-container
+    network_mode: host
+    depends_on:
+     - eureka
+     - config-server
+     - userprofile-service
+     - emailvalidation-service
+    ports:
+     - "7999:7999"
+    expose:
+     - "7999"
+
+  gateway:
+    image: zuulgateway:v1
+    build: ZuulProxy/
+    restart: always
+    container_name: zuul-container
+    network_mode: host
+    depends_on:
+      - eureka
+    ports:
+      - "8084:8084"
+      - "3306:8085"
+    expose:
+      - "8084"
+      - "8085"
+
+
+volumes:
+  mydb1:
+  mydb2:
+
+#networks:
+#  net:
