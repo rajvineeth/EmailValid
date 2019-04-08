@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="src" path="ConfigServer/.mvn/wrapper"/>
+	<classpathentry kind="src" path="ConfigServer/src/main/java"/>
+	<classpathentry kind="src" path="ConfigServer/src/test/java"/>
+	<classpathentry kind="src" path="EmailValidation/.mvn/wrapper"/>
+	<classpathentry kind="src" path="EmailValidation/src/main/java"/>
+	<classpathentry kind="src" path="EurekaServers/.mvn/wrapper"/>
+	<classpathentry kind="src" path="EurekaServers/src/main/java"/>
+	<classpathentry kind="src" path="OTPService/.mvn/wrapper"/>
+	<classpathentry kind="src" path="OTPService/src/main/java"/>
+	<classpathentry kind="src" path="OTPService/src/main/resources"/>
+	<classpathentry kind="src" path="UserProfile/.mvn/wrapper"/>
+	<classpathentry kind="src" path="UserProfile/src/main/java"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
