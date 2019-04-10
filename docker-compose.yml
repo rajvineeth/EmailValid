@@ -121,7 +121,6 @@ services:
     depends_on:
       - eureka
       - config-server
-      - mysql1
   
     ports:
       - 7000:7000
@@ -155,20 +154,6 @@ services:
     expose:
      - "7999"
 
-  gateway:
-    image: zuulgateway:v1
-    build: ZuulProxy/
-    restart: always
-    container_name: zuul-container
-    network_mode: host
-    depends_on:
-      - eureka
-    ports:
-      - "8084:8084"
-      - "3306:8085"
-    expose:
-      - "8084"
-      - "8085"
 
 
 volumes:
