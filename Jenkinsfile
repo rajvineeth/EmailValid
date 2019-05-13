@@ -50,7 +50,7 @@ node{
             //sh  'export PATH=$HOME/.local/bin:$PATH'            
             sh 'which docker-compose'
             //sh 'docker kill $(docker ps -q)'
-        
+			
     }
     stage('SCM Checkout'){
         git credentialsId: 'ba17d94f-f0a5-453e-98ab-0a53f98fdc22', url: 'https://git.cgi.com/palash.moon/emailValidation.git'
